@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>BLOG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <style>
+        .form-box {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-top: 50px;
+        }
+        .form-box h4 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-box input[type="text"] {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .form-box textarea {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none; /* 내용 입력 필드 크기 조절 비활성화 */
+        }
+        .form-box button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto; /* 버튼을 가운데 위치시킴 */
+        }
+        .form-box button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body class="grey-bg">
+<%- include('nav.ejs') %>
+<!-- 포스트 작성하기 -->
+<form class="form-box" action="/add" method="post">
+    <h4>글쓰기</h4>
+    <input type="text" class="form-control" name="title" placeholder="제목을 입력하세요" required>
+    <textarea class="form-control" name="content" rows="5" placeholder="내용을 입력하세요" required></textarea>
+    <button type="submit" class="btn btn-primary">전송</button>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+
+</body>
+</html>

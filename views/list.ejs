@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>BLOG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <style>
+        .card-text {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-line-clamp: 3; /* 글이 3줄을 넘어가면 ...으로 처리 */
+            -webkit-box-orient: vertical;
+        }
+    </style>
+</head>
+<body class="grey-bg">
+<%- include('nav.ejs') %>
+<!-- 블로그 포스트 -->
+<% for (var i = 글목록.length - 1; i >= 0; i--) { %>
+    <div class="row mb-2 justify-content-center " style="margin-top: 20px;">
+        <!-- 첫번째 블로그 포스트 -->
+        <div class="col-md-6">
+            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                <div class="col p-4 d-flex flex-column position-static">
+                    <strong class="d-inline-block mb-2 text-primary-emphasis">Post</strong>
+                    <h3 class="mb-0">
+                        <%= 글목록[i].title %>
+                    </h3>
+                    <div class="mb-1 text-body-secondary">Nov 12</div>
+                    <p class="card-text mb-auto overflow-hidden">
+                        <%= 글목록[i].content %>
+                    </p>
+                    <a href="/detail/<%= 글목록[i]._id %>" class="icon-link gap-1 icon-link-hover stretched-link">
+                        Continue reading
+                        <svg class="bi"><use xlink:href="#chevron-right"/></svg>
+                    </a>
+                </div>
+                <div class="col-auto d-none d-lg-block">
+                    <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+
+</body>
+</html>
