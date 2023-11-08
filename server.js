@@ -18,7 +18,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: { maxAge: 60 * 60 * 1000 },
     store: MongoStore.create({
-        mongoUrl: 'mongodb+srv://admin:qwer1234@cluster0.wffbp6u.mongodb.net/?retryWrites=true&w=majority',
+        mongoUrl: process.env.MongoDB_URL,
         dbName: 'forum',
     })
 }));

@@ -39,3 +39,7 @@ O
 node_modules/multer-s3/index.js,c/b/cb9672016f11d0e96855de3dc2943bf98944d323
 @
 views/search.ejs,e/5/e533fa7e2aeedbc14b9c8e7430e96a4dbe58ddd6
+S
+#.idea/sonarlint/issuestore/index.pb,9/f/9fe84ebb15faf917b7def6236dba604453cc61e0
+]
+-.idea/sonarlint/securityhotspotstore/index.pb,8/8/88a9255124c95bdc913197c120a8d560edc59c8e
