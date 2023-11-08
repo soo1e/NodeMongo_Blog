@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>BLOG</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <style>
+        .card-text {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-line-clamp: 3; /* 글이 3줄을 넘어가면 ...으로 처리 */
+            -webkit-box-orient: vertical;
+        }
+    </style>
 </head>
 <body class="grey-bg">
 <%- include('nav.ejs') %>
@@ -19,14 +27,14 @@
 <!-- 블로그 포스트 -->
 <div class="row mb-2">
     <!-- 첫번째 블로그 포스트 -->
-    <div class="col-md-6">
+    <div class="col-md-6" style="margin-left: 10px; width: 49%" >
         <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
             <div class="col p-4 d-flex flex-column position-static">
                 <strong class="d-inline-block mb-2 text-primary-emphasis">Post</strong>
                 <h3 class="mb-0"><%= 글목록[글목록.length-1].title %></h3>
                 <div class="mb-1 text-body-secondary">Nov 12</div>
                 <p class="card-text mb-auto"><%= 글목록[글목록.length-1].content %></p>
-                <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
+                <a href="/detail/<%= 글목록[글목록.length-1]._id %>" class="icon-link gap-1 icon-link-hover stretched-link">
                     Continue reading
                     <svg class="bi"><use xlink:href="#chevron-right"/></svg>
                 </a>
@@ -38,15 +46,14 @@
     </div>
 
     <!-- 두 번째 블로그 포스트 -->
-    <div class="col-md-6">
+    <div class="col-md-6" style="margin-right: 10px; width: 49%">
         <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
             <div class="col p-4 d-flex flex-column position-static">
                 <strong class="d-inline-block mb-2 text-primary-emphasis">Post</strong>
                 <h3 class="mb-0"><%= 글목록[글목록.length-2].title %></h3>
                 <div class="mb-1 text-body-secondary">Nov 12</div>
                 <p class="card-text mb-auto"><%= 글목록[글목록.length-2].content %></p>
-                <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
-                    Continue reading
+                <a href="/detail/<%= 글목록[글목록.length-2]._id %>" class="icon-link gap-1 icon-link-hover stretched-link">                    Continue reading
                     <svg class="bi"><use xlink:href="#chevron-right"/></svg>
                 </a>
             </div>

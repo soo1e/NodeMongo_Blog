@@ -24,3 +24,18 @@ index.html,f/6/f6013a00b362253c64368d6eebc50ea2131754e2
 views/list.ejs,2/e/2eb107fca413a59b206ba3a4a0d1f48f5423acae
 @
 views/detail.ejs,a/3/a3fe3420f716263386b68fa0c27204aa0acff688
+:
+
+.gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
+>
+views/edit.ejs,9/0/90f0843095e367cf4e0fa475312c38448540bc0a
+?
+views/login.ejs,3/f/3f748e7b3e38d474ff6964f6a6d3381932b1eac9
+B
+views/register.ejs,5/1/518a6436831701577319c124ceb027695f16743c
+4
+.env,3/c/3c84dcdc6bbe3d7817c49dcdc327b926fea1808a
+O
+node_modules/multer-s3/index.js,c/b/cb9672016f11d0e96855de3dc2943bf98944d323
+@
+views/search.ejs,e/5/e533fa7e2aeedbc14b9c8e7430e96a4dbe58ddd6
