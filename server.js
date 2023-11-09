@@ -28,7 +28,7 @@ app.use(passport.session());
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
-const sharp = require("sharp");
+const sharp = require('sharp');
 
 // S3 클라이언트 설정
 const s3Client = new S3Client({
@@ -60,31 +60,60 @@ const upload = multer({
 });
 
 // 이미지 업로드 라우트
-app.post("/upload", upload.single("img1"), async (req, res) => {
+// 이미지 업로드 및 썸네일 생성 및 S3 업로드 라우트
+app.post('/upload', upload.single('img1'), async (req, res) => {
     try {
-        // 업로드된 이미지를 Sharp 모듈을 사용하여 리사이징
+        // 업로드된 이미지를 Sharp 모듈을 사용하여 리사이징하고 배경 채우기
+        const maxWidth = 200;
+        const maxHeight = 200;
+
         const resizedImageBuffer = await sharp(req.file.buffer)
-            .resize({ width: 400 }) // 원하는 크기로 조절
+            .resize({
+                width: maxWidth,
+                height: maxHeight,
+                fit: sharp.fit.cover,
+                background: { r: 0, g: 0, b: 0, alpha: 1 }
+            })
             .toBuffer();
 
-        // 리사이징된 이미지를 S3에 업로드
-        const uploadParams = {
-            Bucket: "soo1eforum",
-            Key: Date.now().toString(), // 파일명 설정 (여기서는 현재 시간을 사용)
+        // 리사이징된 썸네일을 S3에 업로드
+        const thumbnailUploadParams = {
+            Bucket: 'soo1eforum',
+            Key: `thumbnails/${Date.now().toString()}.jpg`,
             Body: resizedImageBuffer,
-            ACL: "public-read", // 업로드된 객체에 대한 ACL 설정
+            ACL: 'public-read',
+            ContentType: 'image/jpeg'
         };
 
-        await s3Client.send(new PutObjectCommand(uploadParams));
+        await s3Client.send(new PutObjectCommand(thumbnailUploadParams));
 
         // 업로드 완료 후 처리 로직
-        console.log("이미지 업로드 및 리사이징 완료");
-        res.send("이미지 업로드 및 리사이징 완료");
+        const thumbnailUrl = `https://soo1eforum.s3.ap-northeast-2.amazonaws.com/thumbnails/${Date.now().toString()}.jpg`;
+        console.log(req.file);
+
+        // 업로드된 이미지의 썸네일 URL을 포스트 정보에 추가하고 DB에 저장
+        const post = {
+            title: req.body.title,
+            content: req.body.content,
+            thumbnailUrl: thumbnailUrl // 이미지의 썸네일 URL을 포스트 정보에 추가
+        };
+
+        // DB에 저장
+        await db.collection('post').insertOne(post);
+
+        console.log("이미지 업로드 및 썸네일 생성 완료:", thumbnailUrl);
+
+        // list.ejs 템플릿에 데이터를 전달하여 렌더링합니다.
+        res.render('list', { thumbnailUrl: thumbnailUrl });
+
     } catch (error) {
         console.error("이미지 업로드 오류:", error);
-        res.status(500).send("이미지 업로드 중 오류 발생");
+        // 오류 발생 시 500 상태 코드와 오류 메시지를 응답으로 보냅니다.
+        res.status(500).json({ error: "이미지 업로드 중 오류 발생" });
     }
 });
+
+
 
 passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
     let result = await db.collection('user').findOne({ username : 입력한아이디})
@@ -116,6 +145,7 @@ passport.deserializeUser(async (user, done) => {
 
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.isAuthenticated();
+    res.locals.user = req.user; // 현재 사용자 정보를 locals에 저장
     next();
 });
 
@@ -146,33 +176,22 @@ app.listen(process.env.PORT, () => {
 
 // 메인 페이지
 app.get('/', async (req, res) => {
-    let result = await db.collection('post').find().toArray()
+    let result = await db.collection('post').find().toArray();
     // db.collection('post').find().toArray() 실행 될 때까지 기다려주세요!
-    res.render('main.ejs', { 글목록 : result })
+    res.render('main.ejs', { result : result })
 })
-
-// 메인 페이지 html 파일 보내기!
-app.get('/main', function(요청, 응답) {
-    응답.sendFile(__dirname + '/index.html')
-})
-
-
-// 뉴스 페이지
-app.get('/news', (req, res)=>{
-    res.send('오늘은 비가 옵니다')
-})
-
-app.get('/shop', (req, res)=>{
-    res.send('쇼핑 페이지입니다')
-})
-
 
 // 리스트 페이지
 app.get('/list', async (req, res) => {
-    let result = await db.collection('post').find().toArray()
+    let result = await db.collection('post').find().toArray();
     // db.collection('post').find().toArray() 실행 될 때까지 기다려주세요!
-    res.render('list.ejs', { result : result })
-})
+
+    // total 페이지 수 계산 (예: 한 페이지에 5개의 글을 표시한다고 가정)
+    const postsPerPage = 5;
+    const totalPages = Math.ceil(result.length / postsPerPage);
+
+    res.render('list.ejs', { result: result, totalPages: totalPages} );
+});
 
 // 글 작성 페이지
 app.get('/write', (req, res) => {
@@ -195,7 +214,10 @@ app.post('/add', upload.single('img1'), async (req, res) => {
 
             let postData = {
                 title: req.body.title,
-                content: req.body.content
+                content: req.body.content,
+                date: Date.now(),
+                user : req.user._id,
+                username : req.user.username,
             };
 
             // 이미지가 있는 경우에만 img 속성 추가
@@ -221,18 +243,17 @@ app.post('/add', upload.single('img1'), async (req, res) => {
 app.get('/detail/:id', async (req, res) => {
     try {
         let result = await db.collection('post').findOne({ _id : new ObjectId(req.params.id) })
+        let result2 = await db.collection('comment').find({ parentID : new ObjectId(req.params.id) }).toArray() // 댓글 데이터 가져오기
+
         if (result == null) {
             res.status(400).send('해당되는 글이 없습니다.')
         } else {
-            res.render('detail.ejs', { result : result })
-            console.log(result)
+            res.render('detail.ejs', { result: result, result2: result2 }); // 댓글 데이터를 템플릿에 전달
         }
-
-    } catch (e){
+    } catch (e) {
         res.send('에러를 입력하지 마세요.')
     }
-
-})
+});
 
 // 글 수정 페이지
 app.get('/edit/:id', async (req, res) => {
@@ -248,7 +269,7 @@ app.post('/edit/:id', async (req, res) => {
     };
 
     try {
-        await db.collection('post').updateOne({ _id: new ObjectId(postId) }, { $set: updatedData });
+        await db.collection('post').updateOne({ _id: new ObjectId(postId) , username : req.user.username, user : req.user._id }), { $set: updatedData };
         res.redirect('/list');
     } catch (error) {
         console.error(error);
@@ -261,7 +282,7 @@ app.get('/delete/:id', async (req, res) => {
     const postId = req.params.id;
 
     try {
-        await db.collection('post').deleteOne({ _id: new ObjectId(postId) });
+        await db.collection('post').deleteOne({ _id: new ObjectId(postId), username : req.user.username, user : req.user._id });
         res.redirect('/list');
     } catch (error) {
         console.error(error);
@@ -270,18 +291,33 @@ app.get('/delete/:id', async (req, res) => {
 });
 
 // 페이지네이션
-app.get('/list/:id', async (req, res) => {
-    let result = await db.collection('post').find()
-        .skip( (req.params.id - 1) * 5 ).limit(5).toArray()
-    res.render('list.ejs', { result : result })
-})
+// 서버 측 Express.js 라우트에서 페이지 별 글 목록 가져오기
+app.get('/list/:page', async (req, res) => {
+    const itemsPerPage = 5; // 페이지당 표시할 글 수
+    const currentPage = parseInt(req.params.page) || 1; // 클라이언트가 요청한 페이지 번호
 
-app.get('/list/next/:id', async (req, res) => {
-    let result = await db.collection('post')
-        .find({_id : {$gt : new ObjectId(req.params.id)}})
-        .limit(5).toArray()
-    res.render('list.ejs', { result : result })
-})
+    try {
+        const totalItems = await db.collection('post').countDocuments();
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        const result = await db.collection('post').find()
+            .skip((currentPage - 1) * itemsPerPage)
+            .limit(itemsPerPage)
+            .toArray();
+
+        res.render('list.ejs', {
+            result: result,
+            totalPages: totalPages,
+            currentPage: currentPage
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('서버 오류가 발생했습니다.');
+    }
+});
+
+
+
 
 // 회원 기능 구현
 // 세션 방식
@@ -362,3 +398,64 @@ app.get('/search', async (req, res)=>{
     res.render('search.ejs', { result : result })
 })
 
+
+// 댓글 기능
+app.post('/comment', async (req, res) => {
+    let result = await db.collection('comment').insertOne({
+        content : req.body.content,
+        writerID : new ObjectId(req.user._id),
+        writer : req.user.username,
+        parentID : new ObjectId(req.body.parentId),
+    })
+
+    res.redirect('back');
+})
+
+// 댓글 수정 페이지 렌더링
+app.get('/comment/:id/edit', async (req, res) => {
+    try {
+        const commentId = req.params.id;
+        const comment = await db.collection('comment').findOne({ _id: new ObjectId(commentId) });
+
+        // 로그인한 사용자와 댓글 작성자의 ID를 비교하여 동일한 경우에만 수정 페이지로 이동
+        if (req.isAuthenticated() && comment && req.user._id.toString() === comment.writerID.toString()) {
+            res.json(comment); // 수정 폼에 필요한 데이터를 JSON 형식으로 응답
+        } else {
+            res.status(401).send('권한이 없습니다.');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('서버 오류가 발생했습니다.');
+    }
+});
+
+// 댓글 수정 처리
+app.put('/comment/:id/edit', async (req, res) => {
+    const commentId = req.params.id;
+    const updatedContent = req.body.content; // 수정된 댓글 내용
+
+    try {
+        // 댓글 업데이트 로직을 구현해주세요
+        // ...
+        res.status(200).send('댓글이 성공적으로 수정되었습니다.');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('댓글 수정 중 오류가 발생했습니다.');
+    }
+});
+
+// 댓글 삭제 처리
+app.delete('/comment/:id/delete', async (req, res) => {
+    const commentId = req.params.id;
+
+    try {
+        // 댓글 삭제 로직을 구현해주세요
+        // ...
+        res.status(200).send('댓글이 성공적으로 삭제되었습니다.');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('댓글 삭제 중 오류가 발생했습니다.');
+    }
+});
+
+// 채팅 기능
