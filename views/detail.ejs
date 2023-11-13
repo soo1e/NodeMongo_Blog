@@ -11,12 +11,13 @@
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
-            min-height: 800px;
+            min-height: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: auto;
+            position: relative; /* 컨테이너에 상대적인 위치 설정 */
         }
 
         .container h2 {
@@ -71,22 +72,35 @@
 
         .image-box {
             width: 100%;
-            position: relative; /* 이미지를 포함한 박스에 position: relative 설정 */
-            margin-bottom : 50px;
+            position: relative;
+            margin-bottom: 50px;
             margin-top: 50px;
         }
 
+
         .image-box img {
-            width: 50%;
-            height: 50%;
+            max-width: 100%; /* 이미지가 컨테이너 너비를 초과하지 않도록 합니다. */
             height: auto;
-            display: block; /* 이미지가 인라인 요소로 표시되는 것을 방지하고 높이 조절을 쉽게 하기 위해 block 요소로 변경 */
-            margin: 0 auto; /* 이미지를 수평으로 가운데 정렬 */
+            display: block;
+            margin: 0 auto;
         }
 
         .top-title {
-            text-align: center; /* 제목 가운데 정렬 */
-            margin-top: 20px; /* 이미지와의 간격 조절 */
+            text-align: center;
+            margin-top: 20px; /* 기본적인 여백 설정 */
+        }
+
+        /* 이미지가 없거나 작은 경우 top-title을 맨 위로 올립니다. */
+        .image-box.no-image img {
+            display: none; /* 이미지가 없는 경우 숨깁니다. */
+        }
+
+        .top-title {
+            text-align: center;
+            margin: 20px 0;
+            width: 100%;
+            position: relative; /* absolute에서 relative로 변경 */
+            z-index: 1; /* 다른 요소 위에 표시하기 위한 우선순위 설정 */
         }
 
     </style>
@@ -181,6 +195,18 @@
             };
             xhr.send();
         });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var imageBox = document.querySelector(".image-box");
+        var topTitle = document.querySelector(".top-title");
+
+        // 이미지가 작거나 없는 경우 no-image 클래스 추가
+        if (imageBox.querySelector("img") && imageBox.querySelector("img").naturalHeight <= 50) {
+            imageBox.classList.add("no-image");
+            topTitle.classList.add("no-image");
+        }
     });
 </script>
 </body>
