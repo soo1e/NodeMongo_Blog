@@ -442,11 +442,38 @@ app.get('/logout', (req, res) => {
 
 
 // 검색 기능
-app.get('/search', async (req, res)=>{
-    let result = await db.collection('post').find({title : {$regex : req.query.val} }).toArray()
-    res.render('search.ejs', { result : result })
-})
+app.get('/search', async (req, res) => {
+    try {
+        const searchQuery = req.query.value;
 
+        // 검색 조건 설정 (title 인덱스 활용)
+        const searchCondition = [
+            {
+                $search: {
+                    index: 'title',
+                    text: {
+                        query: searchQuery,
+                        path: ['title', 'content']
+                    }
+                }
+            }
+        ];
+
+        // 검색 실행
+        const searchResult = await db.collection('post').aggregate(searchCondition).toArray();
+
+        if (searchResult.length === 0) {
+            // 검색 결과가 없을 때의 처리
+            res.render('search.ejs', { posts: [], searchQuery: searchQuery, noResults: true });
+        } else {
+            // 검색 결과를 렌더링
+            res.render('search.ejs', { posts: searchResult, searchQuery: searchQuery, noResults: false });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).render('error.ejs', { errorMessage: '검색 중 오류가 발생했습니다.' });
+    }
+});
 
 // 댓글 기능
 app.post('/comment', async (req, res) => {

@@ -98,8 +98,8 @@ function formatDate(date) {
     </div>
 <% } %>
 <div class="find-btn">
-    <input class="search">
-    <a class="btn btn-dark search-send" >검색</a>
+    <input class="search" id="search-input">
+    <a class="btn btn-dark search-send" id="search">검색</a>
 </div>
 <!-- list.ejs 템플릿에서 페이지 번호 표시하기 -->
 <div class="pagination">
@@ -108,12 +108,16 @@ function formatDate(date) {
     <% } %>
 </div>
 <%- include('footer.ejs') %>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+
+
 <script>
-    document.querySelector('.search-send').addEventListener('click', function(){
-        let search = document.querySelector('.search').value
-        location.href = '/search?val=' + search
-    })
+    $('#search').click(function(){
+        var 입력한값 = $('#search-input').val();
+        window.location.replace('/search?value=' + 입력한값)
+    });
 </script>
 </body>
 </html>
