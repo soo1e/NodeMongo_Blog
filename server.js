@@ -181,7 +181,7 @@ const bcrypt = require('bcrypt')
 
 // 실제 서버
 server.listen(process.env.PORT, () => {
-    console.log('http://localhost:8080 에서 서버 실행중')
+    console.log('http://localhost:80 에서 서버 실행중')
 })
 
 // 메인 페이지
