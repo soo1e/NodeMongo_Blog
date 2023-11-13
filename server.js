@@ -9,9 +9,16 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const MongoStore = require('connect-mongo')
 
+
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const server = createServer(app);
+const io = new Server(server)
+
+
 require('dotenv').config()
 
-app.use(passport.initialize())
+// express-session 미들웨어 등록
 app.use(session({
     secret: '암호화에 쓸 비번',
     resave: false,
@@ -23,6 +30,8 @@ app.use(session({
     })
 }));
 
+// passport 초기화 및 세션 설정
+app.use(passport.initialize());
 app.use(passport.session());
 
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
@@ -46,7 +55,8 @@ const upload = multer({
         bucket: "soo1eforum", // S3 버킷 이름
         acl: "public-read", // 업로드된 객체에 대한 ACL 설정 (public-read는 누구나 읽을 수 있도록 설정)
         key: function (req, file, cb) {
-            cb(null, Date.now().toString()); // 업로드시 파일명 변경가능
+            const fileKey = req.user.username + '/' + Date.now().toString(); // 업로드시 파일명 변경가능
+            cb(null, fileKey);
         },
     }),
     fileFilter: function (req, file, cb) {
@@ -170,7 +180,7 @@ new MongoClient(url).connect().then((client)=>{
 const bcrypt = require('bcrypt')
 
 // 실제 서버
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log('http://localhost:8080 에서 서버 실행중')
 })
 
@@ -183,15 +193,17 @@ app.get('/', async (req, res) => {
 
 // 리스트 페이지
 app.get('/list', async (req, res) => {
-    let result = await db.collection('post').find().toArray();
-    // db.collection('post').find().toArray() 실행 될 때까지 기다려주세요!
+    let result = await db.collection('post').find().sort({ date: -1 }).toArray();
+    // db.collection('post').find().sort({ date: -1 }).toArray() 실행 될 때까지 기다려주세요!
 
     // total 페이지 수 계산 (예: 한 페이지에 5개의 글을 표시한다고 가정)
     const postsPerPage = 5;
     const totalPages = Math.ceil(result.length / postsPerPage);
 
-    res.render('list.ejs', { result: result, totalPages: totalPages} );
+    res.render('list.ejs', { result: result, totalPages: totalPages });
 });
+
+
 
 // 글 작성 페이지
 app.get('/write', (req, res) => {
@@ -208,33 +220,29 @@ app.post('/add', upload.single('img1'), async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             if (req.body.title === '' || !req.body.content) {
-                // 클라이언트에게 메시지를 응답으로 보내기
                 return res.status(400).send('제목과 내용을 입력해주세요.');
             }
 
             let postData = {
                 title: req.body.title,
                 content: req.body.content,
-                date: Date.now(),
-                user : req.user._id,
-                username : req.user.username,
+                date: new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }), // 한국 시간으로 변환
+                user: req.user._id,
+                username: req.user.username,
+                usernick: req.user.usernick,
             };
 
-            // 이미지가 있는 경우에만 img 속성 추가
             if (req.file) {
                 postData.img = req.file.location;
             }
 
             await db.collection('post').insertOne(postData);
-            // 리다이렉트 대신 응답으로 성공 상태 전송
             res.redirect('/list');
         } catch (err) {
             console.log(err);
-            // 에러가 발생한 경우 에러 응답 보내기
-            res.status(500).send('서버 에러 발생');
+            res.status(500).render('error.ejs', { errorMessage: '서버 에러가 발생했습니다.' });
         }
     } else {
-        // 로그인되지 않은 사용자인 경우 로그인 페이지로 리디렉션
         res.redirect('/login');
     }
 });
@@ -246,12 +254,12 @@ app.get('/detail/:id', async (req, res) => {
         let result2 = await db.collection('comment').find({ parentID : new ObjectId(req.params.id) }).toArray() // 댓글 데이터 가져오기
 
         if (result == null) {
-            res.status(400).send('해당되는 글이 없습니다.')
+            res.status(500).render('error.ejs', { errorMessage: '해당되는 글이 없습니다' });
         } else {
             res.render('detail.ejs', { result: result, result2: result2 }); // 댓글 데이터를 템플릿에 전달
         }
     } catch (e) {
-        res.send('에러를 입력하지 마세요.')
+        res.status(505).render('error.ejs', { errorMessage: '에러가 발생했습니다.' });
     }
 });
 
@@ -261,19 +269,36 @@ app.get('/edit/:id', async (req, res) => {
     res.render('edit.ejs', { result : result })
 })
 
-app.post('/edit/:id', async (req, res) => {
+app.post('/edit/:id', upload.single('img1'), async (req, res) => {
     const postId = req.params.id;
     const updatedData = {
         title: req.body.title,
-        content: req.body.content
+        content: req.body.content,
+        user: req.user._id,
+        username: req.user.username,
+        usernick: req.user.usernick,
     };
 
+    if (req.file) {
+        // 이미지가 업로드된 경우에만 업데이트
+        updatedData.img = req.file.location;
+        console.log('Updated image URL:', req.file.location);
+    }
+
     try {
-        await db.collection('post').updateOne({ _id: new ObjectId(postId) , username : req.user.username, user : req.user._id }), { $set: updatedData };
+        const post = await db.collection('post').findOne({ _id: new ObjectId(postId) });
+
+        await db.collection('post').updateOne(
+                { _id: new ObjectId(postId), username: req.user.username, user: req.user._id },
+                { $set: updatedData }
+            );
+
+            console.log('Post updated successfully.');
+
         res.redirect('/list');
     } catch (error) {
         console.error(error);
-        res.status(500).send('서버 오류가 발생했습니다.');
+        res.status(500).render('error.ejs', { errorMessage: '서버 에러가 발생했습니다.' });
     }
 });
 
@@ -286,7 +311,7 @@ app.get('/delete/:id', async (req, res) => {
         res.redirect('/list');
     } catch (error) {
         console.error(error);
-        res.status(500).send('서버 오류가 발생했습니다.');
+        res.status(500).render('error.ejs', { errorMessage: '서버 에러가 발생했습니다.' });
     }
 });
 
@@ -301,6 +326,7 @@ app.get('/list/:page', async (req, res) => {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
 
         const result = await db.collection('post').find()
+            .sort({ date: -1 }) // 최신 글이 맨 위에 오도록 정렬
             .skip((currentPage - 1) * itemsPerPage)
             .limit(itemsPerPage)
             .toArray();
@@ -312,7 +338,7 @@ app.get('/list/:page', async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send('서버 오류가 발생했습니다.');
+        res.status(500).render('error.ejs', { errorMessage: '서버 에러가 발생했습니다.' });
     }
 });
 
@@ -333,52 +359,75 @@ app.get('/login', async (req, res) => {
 
 app.post('/login', async (req, res, next) => {
     passport.authenticate('local', (error, user, info) => {
-        if (error) return res.status(500).json(error);
-        if (!user) return res.status(500).json(info.message);
+        if (error) return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+
+        if (!user) {
+            // 로그인 실패 시 메시지를 세션에 저장
+            req.session.loginError = '아이디 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.';
+            return res.status(401).json({ error: '아이디 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.' });
+        }
+
         // 입력된 비밀번호를 해시로 변환하여 비교
         bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if (err) return res.status(500).json(err);
+            if (err) return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+
             if (result) {
                 req.logIn(user, (err) => {
                     if (err) return next(err);
-                    res.redirect('/');
+                    res.json({ success: true });
                 });
             } else {
-                res.status(500).json({ message: '비밀번호가 일치하지 않습니다' });
+                // 비밀번호 불일치 시 메시지를 세션에 저장
+                req.session.loginError = '아이디(로그인 전용 아이디) 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.';
+                res.status(401).json({ error: '아이디(로그인 전용 아이디) 또는 비밀번호를 잘못 입력했습니다.' });
             }
         });
     })(req, res, next);
 });
+
+
 
 app.get('/register', async (req, res) => {
     res.render('register.ejs');
 })
 
 app.post('/register', async (req, res) => {
-
     let hash = await bcrypt.hash(req.body.password, 10)
 
     const username = req.body.username;
     const password = req.body.password;
+    const usernick = req.body.usernick;
 
-    // 예외 처리: username이 빈칸일 때
-    if (!username || username.trim() === '') {
-        return res.status(400).send('사용자 이름을 입력하세요.');
+    // 예외 처리: username 또는 usernick이 빈칸일 때
+    if (!username || username.trim() === '' || !usernick || usernick.trim() === '') {
+        return res.status(400).json({ error: '사용자 이름과 닉네임을 입력하세요.' });
     }
 
-    // 예외 처리: username이 이미 DB에 있을 때
-    const existingUser = await db.collection('user').findOne({ username: username });
+    // 예외 처리: username 또는 usernick이 이미 DB에 있을 때
+    const existingUser = await db.collection('user').findOne({
+        $or: [
+            { username: username },
+            { usernick: usernick }
+        ]
+    });
+
     if (existingUser) {
-        return res.status(400).send('이미 존재하는 사용자 이름입니다.');
+        const existingField = existingUser.username === username ? '아이디' : '닉네임';
+        return res.status(400).json({ error: `이미 존재하는 ${existingField}입니다.` });
     }
 
     // 예외 처리: password가 짧을 때
     if (!password || password.length < 6) {
-        return res.status(400).send('비밀번호는 최소 6자 이상이어야 합니다.');
+        return res.status(400).json({ error: '비밀번호는 최소 6자 이상이어야 합니다.' });
     }
 
     // 새로운 사용자 등록
-    await db.collection('user').insertOne({ username: req.body.username , password: hash });
+    await db.collection('user').insertOne({
+        username: username,
+        usernick: usernick,
+        password: hash
+    });
+
     res.redirect('/');
 });
 
@@ -401,61 +450,54 @@ app.get('/search', async (req, res)=>{
 
 // 댓글 기능
 app.post('/comment', async (req, res) => {
-    let result = await db.collection('comment').insertOne({
-        content : req.body.content,
-        writerID : new ObjectId(req.user._id),
-        writer : req.user.username,
-        parentID : new ObjectId(req.body.parentId),
-    })
-
-    res.redirect('back');
-})
-
-// 댓글 수정 페이지 렌더링
-app.get('/comment/:id/edit', async (req, res) => {
     try {
-        const commentId = req.params.id;
-        const comment = await db.collection('comment').findOne({ _id: new ObjectId(commentId) });
+        let user = req.user;
 
-        // 로그인한 사용자와 댓글 작성자의 ID를 비교하여 동일한 경우에만 수정 페이지로 이동
-        if (req.isAuthenticated() && comment && req.user._id.toString() === comment.writerID.toString()) {
-            res.json(comment); // 수정 폼에 필요한 데이터를 JSON 형식으로 응답
-        } else {
-            res.status(401).send('권한이 없습니다.');
+        if (!user) {
+            // 로그인되지 않은 경우 처리
+            return res.status(401).render('error.ejs', { errorMessage: '로그인이 필요합니다' +
+                    '.' });
         }
+
+        let result = await db.collection('comment').insertOne({
+            content: req.body.content,
+            writerID: new ObjectId(user._id),
+            writer: user.usernick, // usernick 저장
+            parentID: new ObjectId(req.body.parentId),
+            date: new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }), // 한국 시간으로 변환
+        });
+
+        res.redirect('back');
     } catch (error) {
         console.error(error);
-        res.status(500).send('서버 오류가 발생했습니다.');
+        res.status(500).render('error.ejs', { errorMessage: '댓글 저장 중에 오류가 발생했습니다.' });
     }
 });
 
-// 댓글 수정 처리
-app.put('/comment/:id/edit', async (req, res) => {
-    const commentId = req.params.id;
-    const updatedContent = req.body.content; // 수정된 댓글 내용
-
+app.delete('/deleteComment/:commentId', async (req, res) => {
     try {
-        // 댓글 업데이트 로직을 구현해주세요
-        // ...
-        res.status(200).send('댓글이 성공적으로 수정되었습니다.');
+        let user = req.user;
+
+        if (!user) {
+            // 로그인되지 않은 경우 처리
+            return res.status(401).send('로그인이 필요합니다.');
+        }
+
+        let commentId = req.params.commentId;
+
+        // 댓글 작성자와 현재 로그인한 사용자의 ID를 비교하여 권한 확인
+        let comment = await db.collection('comment').findOne({ _id: new ObjectId(commentId) });
+        if (!comment || comment.writerID.toString() !== user._id.toString()) {
+            // 댓글이 없거나 삭제 권한이 없는 경우
+            return res.status(403).send('삭제할 수 있는 권한이 없습니다.');
+        }
+
+        // 댓글 삭제
+        await db.collection('comment').deleteOne({ _id: new ObjectId(commentId) });
+
+        res.status(200).send('댓글이 삭제되었습니다.');
     } catch (error) {
         console.error(error);
-        res.status(500).send('댓글 수정 중 오류가 발생했습니다.');
+        res.status(500).send('댓글 삭제 중에 오류가 발생했습니다.');
     }
 });
-
-// 댓글 삭제 처리
-app.delete('/comment/:id/delete', async (req, res) => {
-    const commentId = req.params.id;
-
-    try {
-        // 댓글 삭제 로직을 구현해주세요
-        // ...
-        res.status(200).send('댓글이 성공적으로 삭제되었습니다.');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('댓글 삭제 중 오류가 발생했습니다.');
-    }
-});
-
-// 채팅 기능

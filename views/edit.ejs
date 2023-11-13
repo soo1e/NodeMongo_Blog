@@ -12,13 +12,13 @@
             border: 1px solid #ccc;
             border-radius: 10px;
             margin-top: 50px;
-            height: 300px;
+            height: 600px;
         }
         .form-box h4 {
             margin-bottom: 20px;
             text-align: center;
         }
-        .form-box input {
+        .form-box input[type="text"] {
             margin-bottom: 15px;
             padding: 10px;
             width: 100%;
@@ -43,7 +43,8 @@
             cursor: pointer;
             display: block;
             margin: 0 auto; /* 버튼을 가운데 위치시킴 */
-            margin-top: 20px;
+            margin-top: 30px;
+            margin-bottom: 50px;
         }
         .form-box button:hover {
             background-color: #0056b3;
@@ -52,47 +53,31 @@
 </head>
 <body class="grey-bg">
 <%- include('nav.ejs') %>
-<form id="register-form" class="form-box" action="/register" method="post">
-    <h4>회원가입</h4>
-    <input type="text" class="form-control" name="username" placeholder="아이디" required>
-    <input type="text" class="form-control" name="usernick" placeholder="닉네임" required>
-    <input type="password" class="form-control" name="password" placeholder="비밀번호" required>
-    <button type="submit" class="btn btn-primary">가입</button>
+<!-- 포스트 작성하기 -->
+<form class="form-box" action="/edit/<%= result._id %>" method="post" enctype="multipart/form-data">
+    <h4>글 수정하기</h4>
+    <input type="text" class="form-control" name="title" value="<%= result.title %>" placeholder="제목을 입력하세요" required>
+    <textarea class="form-control" name="content" rows="5" placeholder="내용을 입력하세요" required><%= result.content %></textarea>
+    <input type="file" class="form-control" name="img1" accept="image/*" <% if (result.img) { %> data-default="<%= result.img %>" <% } %> multiple>
+    <button type="submit" class="btn btn-success">수정</button>
 </form>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<%- include('footer.ejs') %>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 <script>
-    $(document).ready(function () {
-        $('#register-form').submit(function (event) {
-            event.preventDefault();
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // 페이지가 로드되면 실행되는 코드
 
-            $.ajax({
-                type: 'POST',
-                url: '/register',
-                data: $(this).serialize(),
-                success: function (data) {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        window.location.href = '/';
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('에러 발생:', error);
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.error) {
-                            alert(response.error);
-                        } else {
-                            alert('알 수 없는 오류가 발생했습니다.');
-                        }
-                    } catch (e) {
-                        alert('알 수 없는 오류가 발생했습니다.');
-                    }
-                }
-            });
-            });
-        });
+        // 이미지 파일 선택을 담당하는 input 요소 가져오기
+        const imgInput = document.querySelector('input[name="img1"]');
+
+        // data-default 속성이 존재하는 경우 해당 속성 값을 기본값으로 설정
+        const defaultImgValue = imgInput.getAttribute('data-default');
+        if (defaultImgValue) {
+            imgInput.value = defaultImgValue;
+        }
+    });
 </script>
+
 </body>
 </html>

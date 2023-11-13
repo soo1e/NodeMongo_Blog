@@ -45,3 +45,5 @@ S
 -.idea/sonarlint/securityhotspotstore/index.pb,8/8/88a9255124c95bdc913197c120a8d560edc59c8e
 X
 (node_modules/express/lib/router/layer.js,a/0/a0158217f3b5151c2bc34d68719085f832e47153
+@
+views/footer.ejs,5/0/50e510f2075c86ed0be6f58a60303b91ed16267f
