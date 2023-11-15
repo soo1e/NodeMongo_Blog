@@ -35,12 +35,12 @@ multer, AWS S3, passport, express-session,
 - ID, 닉네임 중복체크
 
 ### 블로그의 주요 기능
-● 글 작성 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EC%9E%91%EC%84%B1-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%9E%91%EC%84%B1-%ED%95%98%EA%B8%B0 )
-● 상세 페이지 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )
-● 글 수정 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )
-● 글 삭제 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )
-● 회원 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%ED%9A%8C%EC%9B%90-%EA%B0%80%EC%9E%85-%EA%B8%B0%EB%8A%A5) )
-● 이미지 업로드 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EC%9E%91%EC%84%B1-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EC%9D%B4%EB%AF%B8%EC%A7%80-%EC%97%85%EB%A1%9C%EB%93%9C-%ED%95%98%EA%B8%B0 )
-● 검색 기능  ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EB%A6%AC%EC%8A%A4%ED%8A%B8-%EA%B8%B0%EB%8A%A5-)#%EF%B8%8F-%EA%B8%80-%EA%B2%80%EC%83%89-%EA%B8%B0%EB%8A%A5 )
-● 댓글 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80%EC%9D%98-%EB%8C%93%EA%B8%80 )
+● 글 작성 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EC%9E%91%EC%84%B1-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%9E%91%EC%84%B1-%ED%95%98%EA%B8%B0 )  
+● 상세 페이지 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )  
+● 글 수정 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )  
+● 글 삭제 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )  
+● 회원 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%ED%9A%8C%EC%9B%90-%EA%B0%80%EC%9E%85-%EA%B8%B0%EB%8A%A5) )  
+● 이미지 업로드 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EC%9E%91%EC%84%B1-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EC%9D%B4%EB%AF%B8%EC%A7%80-%EC%97%85%EB%A1%9C%EB%93%9C-%ED%95%98%EA%B8%B0 )  
+● 검색 기능  ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EB%A6%AC%EC%8A%A4%ED%8A%B8-%EA%B8%B0%EB%8A%A5-)#%EF%B8%8F-%EA%B8%80-%EA%B2%80%EC%83%89-%EA%B8%B0%EB%8A%A5 )  
+● 댓글 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80%EC%9D%98-%EB%8C%93%EA%B8%80 )  
 
