@@ -1,7 +1,7 @@
 # 💻 프로젝트
 : 자유스럽게 글을 작성할 수 있고 방문할 수 있는 블로그입니다.
 
-# 💿 작업 과정
+# 📂 작업 과정
 https://velog.io/@soo1e/series/Node.js-MongoDB
 
 
