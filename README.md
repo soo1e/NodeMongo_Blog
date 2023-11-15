@@ -23,18 +23,7 @@ https://velog.io/@soo1e/series/Node.js-MongoDB
 ### ● 그 외 라이브러리
 multer, AWS S3, passport, express-session, 
 
-
-## 📚주요 기능
-### 멤버 관리
-
-● 로그인
-- DB 값 검증
-- 로그인 시 세션 생성
-
-● 회원 가입
-- ID, 닉네임 중복체크
-
-### 블로그의 주요 기능
+### 📚 블로그의 주요 기능
 ● 글 작성 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EA%B8%80-%EC%9E%91%EC%84%B1-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%9E%91%EC%84%B1-%ED%95%98%EA%B8%B0 )  
 ● 상세 페이지 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )  
 ● 글 수정 기능 ( https://github.com/soo1e/NodeMongo_Blog/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-(-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80-%EA%B8%B0%EB%8A%A5)#%EF%B8%8F-%EA%B8%80-%EC%83%81%EC%84%B8-%ED%8E%98%EC%9D%B4%EC%A7%80 )  
