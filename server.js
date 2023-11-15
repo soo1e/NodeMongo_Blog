@@ -208,7 +208,7 @@ app.get('/list', async (req, res) => {
 // 글 작성 페이지
 app.get('/write', (req, res) => {
     if (req.isAuthenticated()) {
-        // 로그인된 사용자인 경우 글 작성 페이지 렌더링
+            // 로그인된 사용자인 경우 글 작성 페이지 렌더링
         res.render('write.ejs');
     } else {
         // 로그인되지 않은 사용자인 경우 로그인 페이지로 리디렉션
